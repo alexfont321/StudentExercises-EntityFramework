@@ -7,27 +7,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentExercisesWebApp.Data;
 using StudentExercisesWebApp.Models;
-using StudentExercisesWebApp.Models.ViewModels;
 
 namespace StudentExercisesWebApp.Controllers
 {
-    public class StudentsController : Controller
+    public class ExercisesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public StudentsController(ApplicationDbContext context)
+        public ExercisesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Students
+        // GET: Exercises
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Students.Include(s => s.Cohort);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _context.Exercises.ToListAsync());
         }
 
-        // GET: Students/Details/5
+        // GET: Exercises/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -35,53 +33,39 @@ namespace StudentExercisesWebApp.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .Include(s => s.Cohort)
-                .FirstOrDefaultAsync(m => m.StudentId == id);
-            if (student == null)
+            var exercise = await _context.Exercises
+                .FirstOrDefaultAsync(m => m.ExerciseId == id);
+            if (exercise == null)
             {
                 return NotFound();
             }
 
-            return View(student);
+            return View(exercise);
         }
 
-        // GET: Students/Create
+        // GET: Exercises/Create
         public IActionResult Create()
         {
-           // ViewData["CohortId"] = new SelectList(_context.Cohorts, "CohortId", "Name");
-            CreateStudentViewModel model = new CreateStudentViewModel(_context);
-            return View(model);
+            return View();
         }
 
-        // POST: Students/Create
+        // POST: Exercises/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateStudentViewModel model)
+        public async Task<IActionResult> Create([Bind("ExerciseId,Name,Language")] Exercise exercise)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(model.Student);
-
-                foreach (int exerciseId in model.SelectedExercises)
-                {
-                    StudentExercise newSE = new StudentExercise()
-                    {
-                        StudentId = model.Student.StudentId,
-                        ExerciseId = exerciseId
-                    };
-                    _context.Add(newSE);
-                }
+                _context.Add(exercise);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CohortId"] = new SelectList(_context.Cohorts, "CohortId", "Name", model.Student.CohortId);
-            return View(model);
+            return View(exercise);
         }
 
-        // GET: Students/Edit/5
+        // GET: Exercises/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -89,23 +73,22 @@ namespace StudentExercisesWebApp.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students.FindAsync(id);
-            if (student == null)
+            var exercise = await _context.Exercises.FindAsync(id);
+            if (exercise == null)
             {
                 return NotFound();
             }
-            ViewData["CohortId"] = new SelectList(_context.Cohorts, "CohortId", "Name", student.CohortId);
-            return View(student);
+            return View(exercise);
         }
 
-        // POST: Students/Edit/5
+        // POST: Exercises/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("StudentId,FirstName,LastName,CohortId")] Student student)
+        public async Task<IActionResult> Edit(int id, [Bind("ExerciseId,Name,Language")] Exercise exercise)
         {
-            if (id != student.StudentId)
+            if (id != exercise.ExerciseId)
             {
                 return NotFound();
             }
@@ -114,12 +97,12 @@ namespace StudentExercisesWebApp.Controllers
             {
                 try
                 {
-                    _context.Update(student);
+                    _context.Update(exercise);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!StudentExists(student.StudentId))
+                    if (!ExerciseExists(exercise.ExerciseId))
                     {
                         return NotFound();
                     }
@@ -130,11 +113,10 @@ namespace StudentExercisesWebApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CohortId"] = new SelectList(_context.Cohorts, "CohortId", "Name", student.CohortId);
-            return View(student);
+            return View(exercise);
         }
 
-        // GET: Students/Delete/5
+        // GET: Exercises/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -142,31 +124,30 @@ namespace StudentExercisesWebApp.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Students
-                .Include(s => s.Cohort)
-                .FirstOrDefaultAsync(m => m.StudentId == id);
-            if (student == null)
+            var exercise = await _context.Exercises
+                .FirstOrDefaultAsync(m => m.ExerciseId == id);
+            if (exercise == null)
             {
                 return NotFound();
             }
 
-            return View(student);
+            return View(exercise);
         }
 
-        // POST: Students/Delete/5
+        // POST: Exercises/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var student = await _context.Students.FindAsync(id);
-            _context.Students.Remove(student);
+            var exercise = await _context.Exercises.FindAsync(id);
+            _context.Exercises.Remove(exercise);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool StudentExists(int id)
+        private bool ExerciseExists(int id)
         {
-            return _context.Students.Any(e => e.StudentId == id);
+            return _context.Exercises.Any(e => e.ExerciseId == id);
         }
     }
 }
