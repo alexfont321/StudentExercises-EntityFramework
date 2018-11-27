@@ -35,6 +35,8 @@ namespace StudentExercisesWebApp.Controllers
             }
 
             var exercise = await _context.Exercises
+                .Include(e => e.StudentExercises)
+                .ThenInclude(se => se.Student)
                 .FirstOrDefaultAsync(m => m.ExerciseId == id);
             if (exercise == null)
             {
@@ -62,6 +64,8 @@ namespace StudentExercisesWebApp.Controllers
             {
                 _context.Add(model.Exercise);
 
+                if (model.AssignableStudents != null) 
+                {
                 foreach (int studentId in model.ExercicesToStudents)
                 {
                     StudentExercise newSE = new StudentExercise()
@@ -71,6 +75,9 @@ namespace StudentExercisesWebApp.Controllers
                     };
                     _context.Add(newSE);
                 }
+                
+                }
+
 
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
