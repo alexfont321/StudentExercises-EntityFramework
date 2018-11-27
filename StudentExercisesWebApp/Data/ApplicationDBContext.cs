@@ -18,5 +18,6 @@ namespace StudentExercisesWebApp.Data
         public DbSet<Cohort> Cohorts { get; set;}
         public DbSet<Exercise> Exercises { get; set;}
         public DbSet<StudentExercise> StudentExercise { get; set;}
+        public object Student { get; internal set; }
     }
 }
