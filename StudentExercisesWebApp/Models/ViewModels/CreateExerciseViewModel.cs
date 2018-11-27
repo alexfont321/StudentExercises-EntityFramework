@@ -14,6 +14,7 @@ namespace StudentExercisesWebApp.Models.ViewModels
         public List<SelectListItem> AssignableStudents { get; set; }
         public List<int> ExercicesToStudents { get; set; }
 
+        public CreateExerciseViewModel() { }
         public CreateExerciseViewModel(ApplicationDbContext ctx)
         {
             List<Student> AllStudents = ctx.Students.ToList();
